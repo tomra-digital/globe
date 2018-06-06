@@ -1,0 +1,42 @@
+{
+  "name": "globe",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Experiment with WebGL",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest",
+    "build": "webpack --config webpack.prod.js",
+    "start": "webpack-dev-server --open --config webpack.dev.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tomra-digital/globe.git"
+  },
+  "keywords": [
+    "tomra",
+    "webgl"
+  ],
+  "author": "Tomra",
+  "license": "UNLICENSED",
+  "bugs": {
+    "url": "https://github.com/tomra-digital/globe/issues"
+  },
+  "homepage": "https://github.com/tomra-digital/globe#readme",
+  "devDependencies": {
+    "@webpack-cli/init": "0.0.8",
+    "autoprefixer": "^8.6.0",
+    "babel-core": "^6.26.3",
+    "babel-loader": "^7.1.4",
+    "babel-plugin-syntax-dynamic-import": "^6.18.0",
+    "babel-preset-env": "^1.7.0",
+    "css-loader": "^0.28.11",
+    "mini-css-extract-plugin": "^0.4.0",
+    "postcss-loader": "^2.1.5",
+    "precss": "^3.1.2",
+    "style-loader": "^0.21.0",
+    "webpack": "^4.11.1",
+    "webpack-cli": "^3.0.2",
+    "webpack-dev-server": "^3.1.4"
+  }
+}

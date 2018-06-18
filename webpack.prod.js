@@ -1,5 +1,5 @@
-const webpack = require('webpack');
-const path = require('path');
+const webpack = require('webpack')
+const path = require('path')
 
 /*
  * We've enabled Postcss, autoprefixer and precss for you. This allows your app
@@ -16,8 +16,8 @@ const path = require('path');
  *
  */
 
-const autoprefixer = require('autoprefixer');
-const precss = require('precss');
+const autoprefixer = require('autoprefixer')
+const precss = require('precss')
 
 /*
  * We've enabled MiniCssExtractPlugin for you. This allows your app to
@@ -28,7 +28,7 @@ const precss = require('precss');
  *
  */
 
-const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 
 /*
  * SplitChunksPlugin is enabled by default and replaced
@@ -44,71 +44,71 @@ const MiniCssExtractPlugin = require('mini-css-extract-plugin');
  */
 
 module.exports = {
-	module: {
-		rules: [
-			{
-				test: /\.js$/,
-				include: [path.resolve(__dirname, 'src')],
-				loader: 'babel-loader',
+  module: {
+    rules: [
+      {
+        test: /\.js$/,
+        include: [path.resolve(__dirname, 'src')],
+        loader: 'babel-loader',
 
-				options: {
-					presets: [
-						['env',
-						{
-                            "targets": {
-                                        "node": "current"
-                                      },
-							modules: false
-						}]
-					],
+        options: {
+          presets: [
+            ['env',
+              {
+                'targets': {
+                  'node': 'current'
+                },
+                modules: false
+              }]
+          ],
 
-					plugins: ['syntax-dynamic-import']
-				}
-			},
-			{
-				test: /\.css$/,
+          plugins: ['syntax-dynamic-import']
+        }
+      },
+      {
+        test: /\.css$/,
 
-				use: [
-					{
-						loader: MiniCssExtractPlugin.loader
-					},
-					{
-						loader: 'css-loader',
+        use: [
+          {
+            loader: MiniCssExtractPlugin.loader
+          },
+          {
+            loader: 'css-loader',
 
-						options: {
-							sourceMap: true,
-							importLoaders: 1
-						}
-					},
-					{
-						loader: 'postcss-loader',
+            options: {
+              sourceMap: true,
+              importLoaders: 1
+            }
+          },
+          {
+            loader: 'postcss-loader',
 
-						options: {
-							plugins: function() {
-								return [precss, autoprefixer];
-							}
-						}
-					}
-				]
-			}
-		]
-	},
+            options: {
+              plugins: function () {
+                return [precss, autoprefixer]
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
 
-	mode: 'production',
+  mode: 'production',
 
-	optimization: {
-		splitChunks: {
-			chunks: 'async',
-			minSize: 30000,
-			minChunks: 1,
-			name: false,
+  optimization: {
+    splitChunks: {
+      chunks: 'async',
+      minSize: 30000,
+      minChunks: 1,
+      name: false,
 
-			cacheGroups: {
-				vendors: {
-					test: /[\\/]node_modules[\\/]/,
-					priority: -10
-				}
-			}
-		}
-	}
-};
+      cacheGroups: {
+        vendors: {
+          test: /[\\/]node_modules[\\/]/,
+          priority: -10
+        }
+      }
+    }
+  }
+}

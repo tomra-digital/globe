@@ -1,4 +1,7 @@
+import * as ignoreme from 'cesium/Widgets/widgets.css'
 import Cesium from 'cesium/Cesium'
+
+Cesium.Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJlMDRiYTM3OC1iMDdhLTQzZjYtODM4NC1hNDRiZjEwOTJmNjIiLCJpZCI6MTcyMDcsInNjb3BlcyI6WyJhc3IiLCJnYyJdLCJpYXQiOjE1NzE4MTc0NDB9.cMrmvc52BswiaEv7szcbQqSOjCkvVnny2owTwLPr22c';
 
 const viewer = new Cesium.Viewer('cesiumContainer', {
   //terrainProvider: Cesium.createWorldTerrain({
@@ -7,16 +10,25 @@ const viewer = new Cesium.Viewer('cesiumContainer', {
   terrainProvider: new Cesium.CesiumTerrainProvider(
     {
       url: Cesium.IonResource.fromAssetId(1)
-    }),
-  requestVertexNormals: true,
-  animation: false,
-  infoBox: false,
-  sceneModePicker: false,
-  selectionIndicator: false,
-  timeline: false,
-  scene3DOnly: true,
-  shouldAnimate: true,
-  creditContainer: 'cesiumCreditsContainer'
+      //,requestVertexNormals: true
+    })
+  ,animation: false
+  ,baseLayerPicker: false
+  ,fullscreenButton: false
+  ,geocoder: false
+  ,homeButton: false
+  ,infoBox: false
+  ,sceneModePicker: false
+  ,selectionIndicator: false
+  ,timeline: false
+  ,navigationHelpButton: false
+  ,navigationInstructionsInitiallyVisible: false
+  ,scene3DOnly: true
+  ,shouldAnimate: true
+  ,targetFrameRate: 30
+  //,useBrowserRecommendedResolution: true
+  ,creditContainer: 'cesiumCreditsContainer'
+  ,creditViewport: 'cesiumCreditsPopupContainer'
   //terrainExaggeration: 100.0 // Fun! :)
 })
 
@@ -52,7 +64,7 @@ function addLine(lat, long, height, id, startTime) {
   viewer.entities.add(entity)
   viewer.flyTo(entity, {
     duration: 2.0,
-    offset: new Cesium.HeadingPitchRange(0, -0.7, 20e6)
+    offset: new Cesium.HeadingPitchRange(-0.3, -0.7, 20e6)
   })
   window.setTimeout(() => viewer.entities.remove(entity), 4000)
 

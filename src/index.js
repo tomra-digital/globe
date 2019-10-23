@@ -1,10 +1,13 @@
-import ignoreme from 'cesium/Widgets/widgets.css'
 import Cesium from 'cesium/Cesium'
 
 const viewer = new Cesium.Viewer('cesiumContainer', {
-  terrainProvider: Cesium.createWorldTerrain({
-    requestWaterMask: true
-  }),
+  //terrainProvider: Cesium.createWorldTerrain({
+  //  requestWaterMask: true
+  //}),
+  terrainProvider: new Cesium.CesiumTerrainProvider(
+    {
+      url: Cesium.IonResource.fromAssetId(1)
+    }),
   requestVertexNormals: true,
   animation: false,
   infoBox: false,
@@ -31,7 +34,7 @@ function addLine(lat, long, height, id, startTime) {
   polyline.positions = new Cesium.CallbackProperty(function(time, result) {
     const t = Cesium.JulianDate.secondsDifference(time, startTime);
     const curHeight = t > 3 ? height : height * t / 3 // Grow from zero to height in 3 sec, then stop
-    console.log(`Setting height ${curHeight} for ${id} at ${time}`)
+    //console.log(`Setting height ${curHeight} for ${id} at ${time}`)
     const surfacePosition = Cesium.Cartesian3.fromDegrees(long, lat, 0)
     const heightPosition = Cesium.Cartesian3.fromDegrees(long, lat, curHeight * 1e6)
     return [surfacePosition, heightPosition]

@@ -1,7 +1,24 @@
 import * as ignoreme from 'cesium/Widgets/widgets.css'
 import Cesium from 'cesium/Cesium'
+import { accessToken, realtimeEndpoint } from '../config.js'
 
-Cesium.Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJlMDRiYTM3OC1iMDdhLTQzZjYtODM4NC1hNDRiZjEwOTJmNjIiLCJpZCI6MTcyMDcsInNjb3BlcyI6WyJhc3IiLCJnYyJdLCJpYXQiOjE1NzE4MTc0NDB9.cMrmvc52BswiaEv7szcbQqSOjCkvVnny2owTwLPr22c';
+function getUniqueId() {
+    // From https://gist.github.com/gordonbrander/2230317
+    // Math.random should be unique because of its seeding algorithm.
+    // Convert it to base 36 (numbers + letters), and grab the first 9 characters
+    // after the decimal.
+    return Math.random().toString(36).substr(2, 9);
+}
+
+Cesium.Ion.defaultAccessToken = accessToken;
+
+var tenMinuteOffset = Cesium.JulianDate.addSeconds(Cesium.JulianDate.now(), -10, new Cesium.JulianDate());
+
+const animationClock = new Cesium.Clock({
+                               startTime :  tenMinuteOffset,
+                               currentTime : tenMinuteOffset,
+                               shouldAnimate: true
+                             })
 
 const viewer = new Cesium.Viewer('cesiumContainer', {
   //terrainProvider: Cesium.createWorldTerrain({
@@ -24,7 +41,7 @@ const viewer = new Cesium.Viewer('cesiumContainer', {
   ,navigationHelpButton: false
   ,navigationInstructionsInitiallyVisible: false
   ,scene3DOnly: true
-  ,shouldAnimate: true
+  ,clockViewModel: new Cesium.ClockViewModel(animationClock)
   ,targetFrameRate: 30
   //,useBrowserRecommendedResolution: true
   ,creditContainer: 'cesiumCreditsContainer'
@@ -34,18 +51,19 @@ const viewer = new Cesium.Viewer('cesiumContainer', {
 
 viewer.scene.globe.enableLighting = true
 
-function addLine(lat, long, height, id, startTime) {
-  console.log(`Adding line ${id} at ${startTime}!`)
+function addLine(lat, long, volume, id) {
+  const addedTime = animationClock.currentTime
+  console.log(`Adding line ${id} at ${addedTime}!`)
 
-  const color = Cesium.Color.fromHsl((0.6 - (height * 0.5)), 1.0, 0.5)
+  const color = Cesium.Color.fromHsl((0.6 - (volume * 0.5)), 1.0, 0.5)
 
   const polyline = new Cesium.PolylineGraphics()
   polyline.material = new Cesium.ColorMaterialProperty(color)
   polyline.width = new Cesium.ConstantProperty(2)
   polyline.followSurface = new Cesium.ConstantProperty(false)
-  polyline.positions = new Cesium.CallbackProperty(function(time, result) {
-    const t = Cesium.JulianDate.secondsDifference(time, startTime);
-    const curHeight = t > 3 ? height : height * t / 3 // Grow from zero to height in 3 sec, then stop
+  polyline.positions = new Cesium.CallbackProperty(function(currentTime, result) {
+    const t = Cesium.JulianDate.secondsDifference(currentTime, addedTime);
+    const curHeight = t < 0.01 ? 0 : t > 3 ? volume : volume * t / 3 // Grow from zero to height in 3 sec, then stop
     //console.log(`Setting height ${curHeight} for ${id} at ${time}`)
     const surfacePosition = Cesium.Cartesian3.fromDegrees(long, lat, 0)
     const heightPosition = Cesium.Cartesian3.fromDegrees(long, lat, curHeight * 1e6)
@@ -60,25 +78,35 @@ function addLine(lat, long, height, id, startTime) {
     seriesName: 'somename' //Custom property to indicate series name
   })
 
-//Add the entity to the collection.
+  //Add the entity to the collection and zoom in on it.
   viewer.entities.add(entity)
   viewer.flyTo(entity, {
     duration: 2.0,
-    offset: new Cesium.HeadingPitchRange(-0.3, -0.7, 20e6)
+    offset: new Cesium.HeadingPitchRange(0, -0.7, 20e6)
   })
   window.setTimeout(() => viewer.entities.remove(entity), 4000)
 
 }
 
+var ws = new WebSocket(realtimeEndpoint);
+ws.onclose = () => console.log("closed");
+ws.onmessage = (rawResponse) => {
+  const response = JSON.parse(rawResponse.data)
+  console.log("message:", response);
+  response.data.forEach(e => {
+    addLine(e.latitude, e.longitude, e.volume, getUniqueId())
+  })
+}
 
-window.setTimeout(() => addLine(59.8239727, 10.4011683, 1, 1, Cesium.JulianDate.now()), 2000)
+/*
+window.setTimeout(() => addLine(59.8239727, 10.4011683, 1, 1), 2000)
 
-window.setTimeout(() => addLine(49.0, 21.0, 2, 2, Cesium.JulianDate.now()), 4000)
+window.setTimeout(() => addLine(49.0, 21.0, 2, 2), 4000)
 
-window.setTimeout(() => addLine(30.0, 42.0, 3, 3, Cesium.JulianDate.now()), 6000)
+window.setTimeout(() => addLine(30.0, 42.0, 3, 3), 6000)
 
-window.setTimeout(() => addLine(36.0, 33.0, 4, 4, Cesium.JulianDate.now()), 8000)
+window.setTimeout(() => addLine(36.0, 33.0, 4, 4), 8000)
 
-window.setTimeout(() => addLine(-20.0, -63.0, 3, 5, Cesium.JulianDate.now()), 9000)
-
+window.setTimeout(() => addLine(-20.0, -63.0, 3, 5), 9000)
+*/
 

@@ -11,7 +11,7 @@ Add a file `./config.js` with contents:
 
 ```js
 export const accessToken = 'your.cesium.ion.access.token'
-export const realtimeEndpoint = 'url.to.websocket.endpoint'
+export const realtimeEndpoints = ['url.to.websocket.endpoint1', 'endpoint2', ... ]
 ```
 
 - `npm install`

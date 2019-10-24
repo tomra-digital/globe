@@ -1,6 +1,6 @@
 import * as ignoreme from 'cesium/Widgets/widgets.css'
 import Cesium from 'cesium/Cesium'
-import { accessToken, realtimeEndpoint } from '../config.js'
+import { accessToken, realtimeEndpoints } from '../config.js'
 
 function getUniqueId() {
     // From https://gist.github.com/gordonbrander/2230317
@@ -81,23 +81,28 @@ function addLine(lat, long, volume, id) {
 
   //Add the entity to the collection and zoom in on it.
   viewer.entities.add(entity)
-  viewer.flyTo(entity, {
-    duration: 2.0,
-    offset: new Cesium.HeadingPitchRange(0, -0.7, 10e6)
-  })
+  // TODO: Too much data to focus on each individual - choose one random..?
+  //viewer.flyTo(entity, {
+  //  duration: 2.0,
+  //  offset: new Cesium.HeadingPitchRange(0, -0.7, 10e6)
+  //})
   window.setTimeout(() => viewer.entities.remove(entity), 2500)
 
 }
 
-const ws = new WebSocket(realtimeEndpoint);
-ws.onclose = () => console.log("closed");
-ws.onmessage = (rawResponse) => {
-  const response = JSON.parse(rawResponse.data)
-  console.log("message:", response);
-  response.data.forEach(e => {
-    window.setTimeout(() => addLine(e.latitude, e.longitude, e.volume, getUniqueId()), e.delay + Math.floor(Math.random() * 5000))
-  })
-}
+const webSockets = realtimeEndpoints
+  .map(url => new WebSocket(url))
+
+webSockets.forEach(ws => {
+  ws.onclose = () => console.log("closed");
+  ws.onmessage = (rawResponse) => {
+    const response = JSON.parse(rawResponse.data)
+    console.log("message:", response);
+    response.data.forEach(e => {
+      window.setTimeout(() => addLine(e.latitude, e.longitude, e.volume, getUniqueId()), e.delay + Math.floor(Math.random() * 5000))
+    })
+  }
+})
 
 /*
 window.setTimeout(() => addLine(59.8239727, 10.4011683, 1, 1), 2000)

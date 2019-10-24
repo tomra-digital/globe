@@ -55,7 +55,7 @@ function addLine(lat, long, volume, id) {
   const addedTime = animationClock.currentTime
   console.log(`Adding line ${id} at ${addedTime}!`)
 
-  const color = Cesium.Color.fromHsl((0.6 - (volume * 0.5)), 1.0, 0.5)
+  const color = Cesium.Color.fromHsl((0.6 - (volume * 0.005)), 1.0, 0.5)
 
   const polyline = new Cesium.PolylineGraphics()
   polyline.material = new Cesium.ColorMaterialProperty(color)
@@ -63,10 +63,11 @@ function addLine(lat, long, volume, id) {
   polyline.followSurface = new Cesium.ConstantProperty(false)
   polyline.positions = new Cesium.CallbackProperty(function(currentTime, result) {
     const t = Cesium.JulianDate.secondsDifference(currentTime, addedTime);
-    const curHeight = t < 0.01 ? 0 : t > 3 ? volume : volume * t / 3 // Grow from zero to height in 3 sec, then stop
+    const curHeight = t > 2 ? volume : volume * t / 2 // Grow from zero to height in 3 sec, then stop
+    const scaledHeight = Math.log2(curHeight) * 1e5
     //console.log(`Setting height ${curHeight} for ${id} at ${time}`)
     const surfacePosition = Cesium.Cartesian3.fromDegrees(long, lat, 0)
-    const heightPosition = Cesium.Cartesian3.fromDegrees(long, lat, curHeight * 1e6)
+    const heightPosition = Cesium.Cartesian3.fromDegrees(long, lat, scaledHeight < 0.0125 ? 0 : scaledHeight)
     return [surfacePosition, heightPosition]
   }, false)
 
@@ -82,19 +83,19 @@ function addLine(lat, long, volume, id) {
   viewer.entities.add(entity)
   viewer.flyTo(entity, {
     duration: 2.0,
-    offset: new Cesium.HeadingPitchRange(0, -0.7, 20e6)
+    offset: new Cesium.HeadingPitchRange(0, -0.7, 10e6)
   })
-  window.setTimeout(() => viewer.entities.remove(entity), 4000)
+  window.setTimeout(() => viewer.entities.remove(entity), 2500)
 
 }
 
-var ws = new WebSocket(realtimeEndpoint);
+const ws = new WebSocket(realtimeEndpoint);
 ws.onclose = () => console.log("closed");
 ws.onmessage = (rawResponse) => {
   const response = JSON.parse(rawResponse.data)
   console.log("message:", response);
   response.data.forEach(e => {
-    addLine(e.latitude, e.longitude, e.volume, getUniqueId())
+    window.setTimeout(() => addLine(e.latitude, e.longitude, e.volume, getUniqueId()), e.delay + Math.floor(Math.random() * 5000))
   })
 }
 
